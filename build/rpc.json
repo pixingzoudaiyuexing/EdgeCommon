@@ -4431,6 +4431,35 @@
       "doc": "登录SESSION服务"
     },
     {
+      "name": "LoginTicketService",
+      "methods": [
+        {
+          "name": "createLoginTicket",
+          "requestMessageName": "CreateLoginTicketRequest",
+          "responseMessageName": "CreateLoginTicketResponse",
+          "code": "rpc createLoginTicket(CreateLoginTicketRequest) returns (CreateLoginTicketResponse);",
+          "doc": "创建票据",
+          "roles": [
+            "admin"
+          ],
+          "isDeprecated": false
+        },
+        {
+          "name": "findLoginTicketWithValue",
+          "requestMessageName": "FindLoginTicketWithValueRequest",
+          "responseMessageName": "FindLoginTicketWithValueResponse",
+          "code": "rpc findLoginTicketWithValue(FindLoginTicketWithValueRequest) returns (FindLoginTicketWithValueResponse);",
+          "doc": "查找票据\n查找成功后，会自动删除票据信息，所以票据信息只能查询一次",
+          "roles": [
+            "admin"
+          ],
+          "isDeprecated": false
+        }
+      ],
+      "filename": "service_login_ticket.proto",
+      "doc": "登录票据相关服务"
+    },
+    {
       "name": "MessageService",
       "methods": [
         {
@@ -5302,6 +5331,17 @@
           "responseMessageName": "StopNodeResponse",
           "code": "rpc stopNode (StopNodeRequest) returns (StopNodeResponse);",
           "doc": "停止节点",
+          "roles": [
+            "admin"
+          ],
+          "isDeprecated": false
+        },
+        {
+          "name": "uninstallNode",
+          "requestMessageName": "UninstallNodeRequest",
+          "responseMessageName": "UninstallNodeResponse",
+          "code": "rpc uninstallNode(UninstallNodeRequest) returns (UninstallNodeResponse);",
+          "doc": "卸载节点",
           "roles": [
             "admin"
           ],
@@ -12610,7 +12650,9 @@
           "responseMessageName": "LoginUserResponse",
           "code": "rpc loginUser (LoginUserRequest) returns (LoginUserResponse);",
           "doc": "登录",
-          "roles": [],
+          "roles": [
+            "admin"
+          ],
           "isDeprecated": false
         },
         {
@@ -14921,7 +14963,7 @@
     },
     {
       "name": "CountAllEnabledUsersRequest",
-      "code": "message CountAllEnabledUsersRequest {\n\tstring keyword = 1;\n\tbool isVerifying = 2;\n}",
+      "code": "message CountAllEnabledUsersRequest {\n\tstring keyword = 1;\n\tbool isVerifying = 2;\n\tint32 mobileIsVerified = 3; // 手机号是否已验证，1表示已验证，0表示未验证，-1表示所有状态\n}",
       "doc": "计算用户数量"
     },
     {
@@ -15321,7 +15363,7 @@
     },
     {
       "name": "CreateDNSProviderRequest",
-      "code": "message CreateDNSProviderRequest {\n\tstring name = 1;\n\tstring type = 2;\n\tbytes apiParamsJSON = 3;\n}",
+      "code": "message CreateDNSProviderRequest {\n\tstring name = 1;\n\tstring type = 2;\n\tbytes apiParamsJSON = 3;\n\tint32 minTTL = 4; // 最小TTL\n}",
       "doc": "创建服务商"
     },
     {
@@ -15607,6 +15649,16 @@
     {
       "name": "CreateLogResponse",
       "code": "message CreateLogResponse {\n\n}",
+      "doc": ""
+    },
+    {
+      "name": "CreateLoginTicketRequest",
+      "code": "message CreateLoginTicketRequest {\n\tint64 adminId = 1; // 管理员ID，和用户ID二选一\n\tint64 userId = 2; // 用户ID\n\tstring ip = 3; // 可选参数，用户客户端IP\n}",
+      "doc": "创建票据"
+    },
+    {
+      "name": "CreateLoginTicketResponse",
+      "code": "message CreateLoginTicketResponse {\n\tstring value = 1; // 票据值\n}",
       "doc": ""
     },
     {
@@ -16251,7 +16303,7 @@
     },
     {
       "name": "DNSProvider",
-      "code": "message DNSProvider {\n\tint64 id = 1;\n\tstring name = 2;\n\tstring type = 3;\n\tstring typeName = 4;\n\tbytes apiParamsJSON = 5;\n\tint64 dataUpdatedAt = 6;\n}",
+      "code": "message DNSProvider {\n\tint64 id = 1;\n\tstring name = 2;\n\tstring type = 3;\n\tstring typeName = 4;\n\tbytes apiParamsJSON = 5;\n\tint64 dataUpdatedAt = 6;\n\tint32 minTTL = 7; // 最小TTL\n}",
       "doc": ""
     },
     {
@@ -19540,6 +19592,16 @@
       "doc": ""
     },
     {
+      "name": "FindLoginTicketWithValueRequest",
+      "code": "message FindLoginTicketWithValueRequest {\n\tstring value = 1; // 票据值\n}",
+      "doc": "查找票据"
+    },
+    {
+      "name": "FindLoginTicketWithValueResponse",
+      "code": "message FindLoginTicketWithValueResponse {\n\tLoginTicket loginTicket = 1; // 票据信息\n}",
+      "doc": ""
+    },
+    {
       "name": "FindNSAccessLogRequest",
       "code": "message FindNSAccessLogRequest {\n\tstring requestId = 1;\n}",
       "doc": "查找单个日志"
@@ -21076,7 +21138,7 @@
     },
     {
       "name": "ListEnabledUsersRequest",
-      "code": "message ListEnabledUsersRequest {\n\tstring keyword = 1;\n\tbool isVerifying = 4;\n\tint64 offset = 2;\n\tint64 size = 3;\n}",
+      "code": "message ListEnabledUsersRequest {\n\tstring keyword = 1;\n\tbool isVerifying = 4;\n\tint32 mobileIsVerified = 5; // 手机号是否已验证，1表示已验证，0表示未验证，-1表示所有状态\n\tint64 offset = 2;\n\tint64 size = 3;\n}",
       "doc": "列出单页用户"
     },
     {
@@ -21553,6 +21615,11 @@
       "name": "LoginSession",
       "code": "message LoginSession {\n\tint64 id = 1;\n\tint64 adminId = 2;\n\tint64 userId = 3;\n\tstring sid = 4;\n\tbytes valuesJSON = 5;\n\tstring ip = 6;\n\tint64 createdAt = 7;\n\tint64 expiresAt = 8;\n}",
       "doc": "登录SESSION"
+    },
+    {
+      "name": "LoginTicket",
+      "code": "message LoginTicket {\n\tint64 id = 1; // ID\n\tint64 expiresAt = 2; // 过期时间\n\tstring value = 3; // 票据值\n\tint64 adminId = 4; // 管理员ID\n\tint64 userId = 5; // 用户ID\n\tstring ip = 6; // 登录时客户端IP\n}",
+      "doc": "登录票据"
     },
     {
       "name": "LoginUserRequest",
@@ -22266,7 +22333,7 @@
     },
     {
       "name": "StopNodeResponse",
-      "code": "message StopNodeResponse {\n\tbool isOk = 1;\n\tstring error = 2;\n}",
+      "code": "message StopNodeResponse {\n\tbool isOk = 1; // 是否成功\n\tstring error = 2; // 失败时的错误信息\n}",
       "doc": ""
     },
     {
@@ -22415,6 +22482,16 @@
       "doc": "清空表"
     },
     {
+      "name": "UninstallNodeRequest",
+      "code": "message UninstallNodeRequest {\n\tint64 nodeId = 1; // 节点ID\n}",
+      "doc": "卸载节点"
+    },
+    {
+      "name": "UninstallNodeResponse",
+      "code": "message UninstallNodeResponse {\n\tbool isOk = 1; // 是否成功\n\tstring error = 2; // 失败时的错误信息\n}",
+      "doc": ""
+    },
+    {
       "name": "UpdateACMEProviderAccountRequest",
       "code": "message UpdateACMEProviderAccountRequest {\n\tint64 acmeProviderAccountId = 1;\n\tstring name = 2;\n\tstring eabKid = 3;\n\tstring eabKey = 4;\n}",
       "doc": "修改服务商账号"
@@ -22516,7 +22593,7 @@
     },
     {
       "name": "UpdateDNSProviderRequest",
-      "code": "message UpdateDNSProviderRequest {\n\tint64 dnsProviderId = 1;\n\tstring name = 2;\n\tbytes apiParamsJSON = 3;\n}",
+      "code": "message UpdateDNSProviderRequest {\n\tint64 dnsProviderId = 1;\n\tstring name = 2;\n\tbytes apiParamsJSON = 3;\n\tint32 minTTL = 4; // 最小TTL\n}",
       "doc": "修改服务商"
     },
     {
