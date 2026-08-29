@@ -54,3 +54,12 @@ func NewUAMPolicy() *UAMPolicy {
 func (this *UAMPolicy) Init() error {
 	return nil
 }
+
+// FirewallScope 返回 UAM 连续校验失败后的封禁范围。
+// 兼容旧策略：没有写入 scope 时按 1.3.9 默认行为回退为全局范围。
+func (this *UAMPolicy) FirewallScope() firewallconfigs.FirewallScope {
+	if this == nil || len(this.Firewall.Scope) == 0 {
+		return firewallconfigs.FirewallScopeGlobal
+	}
+	return this.Firewall.Scope
+}
