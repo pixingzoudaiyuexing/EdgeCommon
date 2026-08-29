@@ -86,19 +86,28 @@ func DefaultHTTPCCConfig() *HTTPCCConfig {
 }
 
 // HTTPCCConfig HTTP CC 防护配置。
+//
+// 字段顺序与 1.3.9 Plus 二进制中的 Go 运行时类型元数据保持一致。
+// Level、WithRequestPath、IgnoreCommonAgents 和 Action 在公开 !plus 版本中曾被裁掉，
+// 这里恢复它们是为了兼容既有 JSON、管理端表单以及后续节点运行时实现。
 type HTTPCCConfig struct {
-	IsPrior bool `yaml:"isPrior" json:"isPrior"` // 是否覆盖父级
-	IsOn    bool `yaml:"isOn" json:"isOn"`       // 是否启用
+	IsPrior bool   `yaml:"isPrior" json:"isPrior"` // 是否覆盖父级
+	IsOn    bool   `yaml:"isOn" json:"isOn"`       // 是否启用
+	Level   string `yaml:"level" json:"level"`     // CC 防护级别
 
-	EnableFingerprint    bool `yaml:"enableFingerprint" json:"enableFingerprint"`       // 是否启用浏览器指纹校验
-	EnableGET302         bool `yaml:"enableGET302" json:"enableGET302"`                 // 是否启用 GET 302 校验
-	UseDefaultThresholds bool `yaml:"useDefaultThresholds" json:"useDefaultThresholds"` // 是否使用默认阈值
-	IgnoreCommonFiles    bool `yaml:"ignoreCommonFiles" json:"ignoreCommonFiles"`       // 是否忽略常见静态文件
-	MinQPSPerIP          int  `yaml:"minQPSPerIP" json:"minQPSPerIP"`                   // 启用要求的单 IP 最低平均 QPS
+	WithRequestPath      bool               `yaml:"withRequestPath" json:"withRequestPath"`           // 请求计数是否区分路径
+	UseDefaultThresholds bool               `yaml:"useDefaultThresholds" json:"useDefaultThresholds"` // 是否使用默认阈值
+	Thresholds           []*HTTPCCThreshold `yaml:"thresholds" json:"thresholds"`                     // 自定义阈值
+	IgnoreCommonFiles    bool               `yaml:"ignoreCommonFiles" json:"ignoreCommonFiles"`       // 是否忽略常见静态文件
+	IgnoreCommonAgents   bool               `yaml:"ignoreCommonAgents" json:"ignoreCommonAgents"`     // 是否忽略常见客户端
+	Action               string             `yaml:"action" json:"action"`                             // 达到阈值后的动作
 
-	Thresholds        []*HTTPCCThreshold   `yaml:"thresholds" json:"thresholds"`               // 自定义阈值
 	OnlyURLPatterns   []*shared.URLPattern `yaml:"onlyURLPatterns" json:"onlyURLPatterns"`     // 仅限的 URL
 	ExceptURLPatterns []*shared.URLPattern `yaml:"exceptURLPatterns" json:"exceptURLPatterns"` // 排除的 URL
+
+	EnableFingerprint bool `yaml:"enableFingerprint" json:"enableFingerprint"` // 是否启用浏览器指纹校验
+	EnableGET302      bool `yaml:"enableGET302" json:"enableGET302"`           // 是否启用 GET 302 校验
+	MinQPSPerIP       int  `yaml:"minQPSPerIP" json:"minQPSPerIP"`             // 启用要求的单 IP 最低平均 QPS
 }
 
 func NewHTTPCCConfig() *HTTPCCConfig {
