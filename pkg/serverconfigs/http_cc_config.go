@@ -87,20 +87,25 @@ func DefaultHTTPCCConfig() *HTTPCCConfig {
 
 // HTTPCCConfig HTTP CC 防护配置。
 //
-// 字段顺序与 1.3.9 Plus 二进制中的 Go 运行时类型元数据保持一致。
+// 字段顺序与可信 1.3.9 Plus edge-node 的 Go 运行时类型元数据保持一致。
 // Level、WithRequestPath、IgnoreCommonAgents 和 Action 在公开 !plus 版本中曾被裁掉，
-// 这里恢复它们是为了兼容既有 JSON、管理端表单以及后续节点运行时实现。
+// 因此仍需保留这些字段以兼容既有 JSON 和历史配置。
+//
+// 可信 1.3.9 Plus edge-node 静态审计进一步确认：WithRequestPath 会被 doCC() 读取；
+// Level、IgnoreCommonAgents、Action 则不会被 doCC() 直接读取，HTTPCCConfig.Init() / MatchURL()
+// 也不会把它们转换成其他运行时配置。自维护版本不得仅凭字段名为这三个兼容字段新增
+// 请求级跳过、放行或阻断语义。
 type HTTPCCConfig struct {
 	IsPrior bool   `yaml:"isPrior" json:"isPrior"` // 是否覆盖父级
 	IsOn    bool   `yaml:"isOn" json:"isOn"`       // 是否启用
-	Level   string `yaml:"level" json:"level"`     // CC 防护级别
+	Level   string `yaml:"level" json:"level"`     // 历史兼容字段；1.3.9 Node 请求链不直接读取
 
 	WithRequestPath      bool               `yaml:"withRequestPath" json:"withRequestPath"`           // 请求计数是否区分路径
 	UseDefaultThresholds bool               `yaml:"useDefaultThresholds" json:"useDefaultThresholds"` // 是否使用默认阈值
 	Thresholds           []*HTTPCCThreshold `yaml:"thresholds" json:"thresholds"`                     // 自定义阈值
 	IgnoreCommonFiles    bool               `yaml:"ignoreCommonFiles" json:"ignoreCommonFiles"`       // 是否忽略常见静态文件
-	IgnoreCommonAgents   bool               `yaml:"ignoreCommonAgents" json:"ignoreCommonAgents"`     // 是否忽略常见客户端
-	Action               string             `yaml:"action" json:"action"`                             // 达到阈值后的动作
+	IgnoreCommonAgents   bool               `yaml:"ignoreCommonAgents" json:"ignoreCommonAgents"`     // 历史兼容字段；1.3.9 Node 请求链不直接读取
+	Action               string             `yaml:"action" json:"action"`                             // 历史兼容字段；1.3.9 Node 请求链不直接读取
 
 	OnlyURLPatterns   []*shared.URLPattern `yaml:"onlyURLPatterns" json:"onlyURLPatterns"`     // 仅限的 URL
 	ExceptURLPatterns []*shared.URLPattern `yaml:"exceptURLPatterns" json:"exceptURLPatterns"` // 排除的 URL
